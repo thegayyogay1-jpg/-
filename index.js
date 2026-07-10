@@ -147,7 +147,7 @@ app.post('/webhook', async (req, res) => {
                             if (!isNaN(customPrice) && customPrice > 0) gameConfig.pricePerSlot = customPrice;
                             if (!isNaN(customMaxSlots) && customMaxSlots > 0) gameConfig.maxSlots = customMaxSlots;
 
-                            replyText = `📢 เริ่มเปิดรอบแทง 🎉\n🎰 รอบที่: ${currentRound}\n💵 ล็อคราคา: ช่องละ ${gameConfig.pricePerSlot} บาท\n🔒 จำกัดจำนวน: ไม่เกิน ${gameConfig.maxSlots} ช่อง/ตัว\n──────────────────\n📋 รหัสสำหรับส่งโพย:\n1=🍐น้ำเต้า , 2=🦀ปู \n 3=🐟ปลา , 4=🦐กุ้ง \n 5=🐔ไก่ , 6=🐯เสือ\n📌 วิธีแทง: พิมพ์ [รหัส]-[จำนวนช่อง]\n👉 สามารถพิมพ์ติดกันได้ เช่น 123-5 (แทง 1,2,3 อย่างละ 5 ช่อง)`;
+                            replyText = `📢 เริ่มเปิดรอบแทง 🎉\n🎰 รอบที่: ${currentRound}\n💵 ล็อคราคา: ช่องละ ${gameConfig.pricePerSlot} บาท\n🔒 จำกัดจำนวน: ไม่เกิน ${gameConfig.maxSlots} ช่อง/ตัว\n──────────────────\n📋 รหัสสำหรับส่งโพย:\n1=🍐น้ำเต้า , 2=🦀ปู \n3=🐟ปลา , 4=🦐กุ้ง \n5=🐔ไก่ , 6=🐯เสือ\n📌 วิธีแทง: พิมพ์ [รหัส]-[จำนวนช่อง]\n👉 สามารถพิมพ์ติดกันได้ เช่น 123-5 (แทง 1,2,3 อย่างละ 5 ช่อง)`;
                         // 2. ดึงประวัติสถิติมาต่อท้ายบรรลัดล่างสุด
                             replyText += `\n──────────────────\n📊 สถิติผลรางวัล 10 รอบล่าสุด:\n──────────────────\n`;
                             if (gameHistory.length === 0) {
@@ -157,7 +157,7 @@ app.post('/webhook', async (req, res) => {
                                 let chronologicalHistory = gameHistory.slice().reverse();
                     
                     chronologicalHistory.forEach((history) => {
-                        replyText += `• รอบที่ ${history.round} ออก: [ ${history.resultNames.join(' , ')} ]\n──────────────────\n`;
+                        replyText += `• รอบที่ ${history.round} ออก \n[ ${history.resultNames.join(' , ')} ]\n──────────────────\n`;
                                 });
                             }
                         }
@@ -364,7 +364,7 @@ app.post('/webhook', async (req, res) => {
                             tempDiceResults = tempDices; 
 
                             let diceNames = tempDiceResults.map(code => itemNames[code]);
-                            replyText = `📊 ตรวจสอบผลรางวัล น้ำเต้าปูปลา รอบที่: ${currentRound}\n──────────────────\n🎲 ผลลูกเต๋า: [ ${diceNames.join(' , ')} ]\n──────────────────\n🚨 หากผลรางวัลถูกต้อง ให้พิมพ์: ok\nหากพิมพ์รหัสผิด ให้พิมพ์: no`;
+                            replyText = `📊 ตรวจสอบผลรางวัล น้ำเต้าปูปลา รอบที่: ${currentRound}\n──────────────────\n🎲 ผลออก\n [${diceNames.join(' , ')} ]\n──────────────────\n🚨 หากผลรางวัลถูกต้อง ให้พิมพ์: ok\nหากพิมพ์รหัสผิด ให้พิมพ์: no`;
                         }
                     }
                 }
