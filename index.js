@@ -415,7 +415,6 @@ app.post('/webhook', async (req, res) => {
                     }
                 }
             }
-            }
 
             // ==================== [ 10. ระบบลงทะเบียนสมาชิกใหม่ชั่วคราว (C/ชื่อ) ] ====================
             else if (originalMsg.startsWith('C/') || originalMsg.startsWith('c/')) {
