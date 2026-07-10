@@ -379,6 +379,16 @@ else if (userMsg === 'ok' || userMsg === 'no') {
     } else {
         if (userMsg === 'ok') {
             let diceNames = tempDiceResults.map(code => itemNames[code]);
+
+            // บันทึกผลรางวัลลงในสถิติย้อนหลัง
+            gameHistory.unshift({
+                round: currentRound,
+                resultNames: diceNames
+            });
+
+            if (gameHistory.length > 10) {
+                gameHistory.pop();
+            }
             
             // แจกแจงหน้าไลน์ให้เห็นชัดๆ ว่าอันดับไหนจ่ายเท่าไหร่
             let summaryPayoutText = `💰 สรุปยอดได้/เสีย น้ำเต้าปูปลา รอบที่: ${currentRound}\n`;
@@ -401,27 +411,30 @@ else if (userMsg === 'ok' || userMsg === 'no') {
                 // วิ่งเช็กทีละตัวที่สมาชิกแทงไว้ในโพย
                 userBetsArray.forEach((bet) => {
                     let ratePerSlot = 0;
-                    let hitPosition = "";
+                    let hitPosition = [];
 
-                    // 🎯 เช็กทีละตำแหน่งเรียงจากซ้ายไปขวา (แข่งกีฬา อันดับ 1, 2, 3)
+                    // 🎯 เปลี่ยนเป็น IF แยกกันอิสระ 3 ตัว เพื่อเช็กครบทุกตำแหน่ง ไม่มีข้ามกรณีออกเบิ้ล
+                    // เช็กอันดับ 1 (ซ้ายสุด)
                     if (bet.itemCode === tempDiceResults[0]) {
-                        ratePerSlot = 800; // ตรงอันดับ 1 ตัวซ้ายสุด จ่าย 800
-                        hitPosition = "อันดับ 1";
-                    } else if (bet.itemCode === tempDiceResults[1]) {
-                        ratePerSlot = 400; // ตรงอันดับ 2 ตัวกลาง จ่าย 400
-                        hitPosition = "อันดับ 2";
-                    } else if (bet.itemCode === tempDiceResults[2]) {
-                        ratePerSlot = 400; // ตรงอันดับ 3 ตัวขวาสุด จ่าย 400
-                        hitPosition = "อันดับ 3";
+                        itemWinAmount += 800 * bet.slotsCount;
+                        hitDetails.push(`อันดับ 1`);
+                    }
+                    // เช็กอันดับ 2 (ตรงกลาง)
+                    if (bet.itemCode === tempDiceResults[1]) {
+                        itemWinAmount += 400 * bet.slotsCount;
+                        hitDetails.push(`อันดับ 2`);
+                    }
+                    // เช็กอันดับ 3 (ขวาสุด)
+                    if (bet.itemCode === tempDiceResults[2]) {
+                        itemWinAmount += 400 * bet.slotsCount;
+                        hitDetails.push(`อันดับ 3`);
                     }
 
-                    // ถ้าตรงตำแหน่งไหนตำแหน่งหนึ่ง
-                    if (ratePerSlot > 0) {
+                    // ถ้ารายการแทงนี้ถูกรางวัลตำแหน่งใดตำแหน่งหนึ่ง (หรือหลายตำแหน่งหากออกเบิ้ล)
+                    if (itemWinAmount > 0) {
                         hitAny = true;
-                        let linePayout = ratePerSlot * bet.slotsCount;
-                        totalWinAmount += linePayout;
-
-                        userDetailText += `  • 🎉 ถูก ${bet.itemName} [X ${bet.slotsCount}]: ได้ +${linePayout} บ.\n`;
+                        totalWinAmount += itemWinAmount;
+                        userDetailText += `  • 🎉 ถูก ${bet.itemName} (${hitDetails.join(' + ')}) [${bet.slotsCount} ช่อง]: ได้ +${itemWinAmount} บ.\n`;
                     }
                 });
 
