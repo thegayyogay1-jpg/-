@@ -377,11 +377,17 @@ app.post('/webhook', async (req, res) => {
                             const user = usersWallets[uId];
                             let totalWinAmount = 0; 
 
+                            // ✨ จุดแก้ไขบั๊ก: คำนวณแยกตามรายบรรทัดของโพยตัวเลขนั้นๆ อย่างเด็ดขาด
                             userBetsArray.forEach((bet) => {
+                                // นับว่ารหัสสิ่งของ (bet.itemCode) ตัวนี้ ตรงกับลูกเต๋ากี่ลูก
                                 let matchCount = tempDiceResults.filter(diceCode => diceCode === bet.itemCode).length;
                                 
                                 if (matchCount > 0) {
-                                    let ratePerSlot = (matchCount === 1) ? 800 : 400;
+                                    let ratePerSlot = 0;
+                                    if (matchCount === 1) ratePerSlot = 800;      // ถูก 1 ตัว ได้ช่องละ 800
+                                    else if (matchCount === 2) ratePerSlot = 400; // ถูก 2 ตัว ได้ช่องละ 400
+                                    else if (matchCount === 3) ratePerSlot = 400; // ถูก 3 ตัว ได้ช่องละ 400
+                                    
                                     let linePayout = ratePerSlot * bet.slotsCount;
                                     totalWinAmount += linePayout;
                                 }
@@ -408,6 +414,7 @@ app.post('/webhook', async (req, res) => {
                         replyText = "❌ ยกเลิกผลการสุ่มเต๋าเรียบร้อย! แอดมินสามารถคีย์คำสั่ง > เพื่อส่งผลใหม่อีกครั้งได้เลยครับ";
                     }
                 }
+            }
             }
 
             // ==================== [ 10. ระบบลงทะเบียนสมาชิกใหม่ชั่วคราว (C/ชื่อ) ] ====================
