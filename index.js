@@ -370,7 +370,7 @@ app.post('/webhook', async (req, res) => {
                 }
             }
 
-            // ==================== [ 9. แอดมินยืนยันคำนวณแพ้ชนะจริง OK / NO (เวอร์ชันคิดเงินตามอันดับซ้ายไปขวา) ] ====================
+            // ==================== [ 9. แอดมินยืนยันคำนวณแพ้ชนะจริง OK / NO (แก้ไขบั๊กออกเบิ้ล/ออกตองคิดเงินครบทุกตำแหน่ง) ] ====================
 else if (userMsg === 'ok' || userMsg === 'no') {
     if (userId !== ADMIN_ID) return res.sendStatus(200);
 
@@ -379,7 +379,7 @@ else if (userMsg === 'ok' || userMsg === 'no') {
     } else {
         if (userMsg === 'ok') {
             let diceNames = tempDiceResults.map(code => itemNames[code]);
-
+            
             // บันทึกผลรางวัลลงในสถิติย้อนหลัง
             gameHistory.unshift({
                 round: currentRound,
@@ -389,8 +389,7 @@ else if (userMsg === 'ok' || userMsg === 'no') {
             if (gameHistory.length > 10) {
                 gameHistory.pop();
             }
-            
-            // แจกแจงหน้าไลน์ให้เห็นชัดๆ ว่าอันดับไหนจ่ายเท่าไหร่
+
             let summaryPayoutText = `💰 สรุปยอดได้/เสีย น้ำเต้าปูปลา รอบที่: ${currentRound}\n`;
             summaryPayoutText += `🥇 อันดับ 1 (จ่าย 800): ${diceNames[0]}\n`;
             summaryPayoutText += `🥈 อันดับ 2 (จ่าย 400): ${diceNames[1]}\n`;
@@ -408,10 +407,10 @@ else if (userMsg === 'ok' || userMsg === 'no') {
                 let userDetailText = `👤 [ ${user.memberNumber} ] คุณ ${user.name}\n`;
                 let hitAny = false;
 
-                // วิ่งเช็กทีละตัวที่สมาชิกแทงไว้ในโพย
+                // วิ่งเช็กทีละรายการแทงในโพย
                 userBetsArray.forEach((bet) => {
-                    let ratePerSlot = 0;
-                    let hitPosition = [];
+                    let itemWinAmount = 0; // ยอดชนะสะสมของโพยบรรทัดนี้ (รองรับกรณีออกเบิ้ล/ออกตอง)
+                    let hitDetails = [];  // เก็บข้อความแจกแจงอันดับที่ถูก
 
                     // 🎯 เปลี่ยนเป็น IF แยกกันอิสระ 3 ตัว เพื่อเช็กครบทุกตำแหน่ง ไม่มีข้ามกรณีออกเบิ้ล
                     // เช็กอันดับ 1 (ซ้ายสุด)
@@ -440,7 +439,7 @@ else if (userMsg === 'ok' || userMsg === 'no') {
 
                 if (hitAny) {
                     user.balance += totalWinAmount;
-                    userDetailText += ` ──────────────────\n 💰 รวมรับรอบนี้: +${totalWinAmount} บาท\n  ✨ เครดิตสุทธิ: ${user.balance} บาท\n`;
+                    userDetailText += `  💰 รวมรับรอบนี้: +${totalWinAmount} บาท\n  ✨ เครดิตสุทธิ: ${user.balance} บาท\n`;
                 } else {
                     userDetailText += `  ❌ รอบนี้ไม่ถูกรางวัล\n  ✨ เครดิตคงเหลือ: ${user.balance} บาท\n`;
                 }
@@ -453,14 +452,13 @@ else if (userMsg === 'ok' || userMsg === 'no') {
                 summaryPayoutText += "ℹ️ ไม่มีสมาชิกท่านใดส่งโพยเดิมพันในรอบนี้ครับ";
             }
 
-            // รีเซ็ตค่ารอบเมื่อคิดเงินเสร็จ
             roundBets = {};
             tempDiceResults = [];
             replyText = summaryPayoutText;
 
         } else if (userMsg === 'no') {
             tempDiceResults = [];
-            replyText = "❌ ยกเลิกผลรางวัลเรียบร้อย! แอดมินสามารถคีย์คำสั่ง > เพื่อส่งผลใหม่อีกครั้งได้เลยครับ";
+            replyText = "❌ ยกเลิกผลรางวัลเรียบร้อย! แอดมินสามารถคีย์คำสั่ง > เพื่อส่งผลใหม้อีกครั้งได้เลยครับ";
         }
     }
 }
