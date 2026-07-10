@@ -357,7 +357,7 @@ app.post('/webhook', async (req, res) => {
                 }
             }
 
-            // ==================== [ 9. แอดมินยืนยันคำนวณแพ้ชนะจริง OK / NO (ปรับปรุงระบบแจกแจงรายตัว) ] ====================
+            // ==================== [ 9. แอดมินยืนยันคำนวณแพ้ชนะจริง OK / NO (เวอร์ชันคิดเงินตามอันดับซ้ายไปขวา) ] ====================
 else if (userMsg === 'ok' || userMsg === 'no') {
     if (userId !== ADMIN_ID) return res.sendStatus(200);
 
@@ -366,7 +366,13 @@ else if (userMsg === 'ok' || userMsg === 'no') {
     } else {
         if (userMsg === 'ok') {
             let diceNames = tempDiceResults.map(code => itemNames[code]);
-            let summaryPayoutText = `💰 สรุปยอดได้/เสีย น้ำเต้าปูปลา รอบที่: ${currentRound}\n🎲 ผลออก: [ ${diceNames.join(' , ')} ]\n──────────────────\n`;
+            
+            // แจกแจงหน้าไลน์ให้เห็นชัดๆ ว่าอันดับไหนจ่ายเท่าไหร่
+            let summaryPayoutText = `💰 สรุปยอดได้/เสีย น้ำเต้าปูปลา รอบที่: ${currentRound}\n`;
+            summaryPayoutText += `🥇 อันดับ 1 (จ่าย 800): ${diceNames[0]}\n`;
+            summaryPayoutText += `🥈 อันดับ 2 (จ่าย 400): ${diceNames[1]}\n`;
+            summaryPayoutText += `🥉 อันดับ 3 (จ่าย 400): ${diceNames[2]}\n`;
+            summaryPayoutText += `──────────────────\n`;
             
             let hasAnyStatement = false;
 
@@ -379,25 +385,30 @@ else if (userMsg === 'ok' || userMsg === 'no') {
                 let userDetailText = `👤 [ ${user.memberNumber} ] คุณ ${user.name}\n`;
                 let hitAny = false;
 
-                // วิ่งเช็กทีละตัวที่ผู้เล่นคนนี้แทงไว้
+                // วิ่งเช็กทีละตัวที่สมาชิกแทงไว้ในโพย
                 userBetsArray.forEach((bet) => {
-                    // นับว่าตัวนี้ ตรงกับลูกเต๋ากี่ลูก (ผลลัพธ์ 1, 2 หรือ 3)
-                    let matchCount = tempDiceResults.filter(diceCode => diceCode === bet.itemCode).length;
-                    
-                    if (matchCount > 0) {
+                    let ratePerSlot = 0;
+                    let hitPosition = "";
+
+                    // 🎯 เช็กทีละตำแหน่งเรียงจากซ้ายไปขวา (แข่งกีฬา อันดับ 1, 2, 3)
+                    if (bet.itemCode === tempDiceResults[0]) {
+                        ratePerSlot = 800; // ตรงอันดับ 1 ตัวซ้ายสุด จ่าย 800
+                        hitPosition = "อันดับ 1";
+                    } else if (bet.itemCode === tempDiceResults[1]) {
+                        ratePerSlot = 400; // ตรงอันดับ 2 ตัวกลาง จ่าย 400
+                        hitPosition = "อันดับ 2";
+                    } else if (bet.itemCode === tempDiceResults[2]) {
+                        ratePerSlot = 400; // ตรงอันดับ 3 ตัวขวาสุด จ่าย 400
+                        hitPosition = "อันดับ 3";
+                    }
+
+                    // ถ้าตรงตำแหน่งไหนตำแหน่งหนึ่ง
+                    if (ratePerSlot > 0) {
                         hitAny = true;
-                        let ratePerSlot = 0;
-                        
-                        // 🎯 ปรับตัวคูณตามที่คุณสั่งเป๊ะๆ
-                        if (matchCount === 1) ratePerSlot = 800;      // ผลลัพธ์ที่ 1 -> คูณ 800
-                        else if (matchCount === 2) ratePerSlot = 400; // ผลลัพธ์ที่ 2 -> คูณ 400
-                        else if (matchCount === 3) ratePerSlot = 400; // ผลลัพธ์ที่ 3 -> คูณ 400
-                        
                         let linePayout = ratePerSlot * bet.slotsCount;
                         totalWinAmount += linePayout;
 
-                        // เขียนแจกแจงให้แอดมินและผู้เล่นอ่านง่ายขึ้น บอทจะพ่นบอกเลยว่าตัวไหนได้เท่าไหร่
-                        userDetailText += `  • 🎉 ถูก ${bet.itemName} (${matchCount} ลูก) [${bet.slotsCount} ช่อง]: ได้ +${linePayout} บ.\n`;
+                        userDetailText += `  • 🎉 ถูก ${bet.itemName} (${hitPosition}) [${bet.slotsCount} ช่อง]: ได้ +${linePayout} บ.\n`;
                     }
                 });
 
@@ -416,18 +427,17 @@ else if (userMsg === 'ok' || userMsg === 'no') {
                 summaryPayoutText += "ℹ️ ไม่มีสมาชิกท่านใดส่งโพยเดิมพันในรอบนี้ครับ";
             }
 
-            // เคลียร์ค่ารอบ
+            // รีเซ็ตค่ารอบเมื่อคิดเงินเสร็จ
             roundBets = {};
             tempDiceResults = [];
             replyText = summaryPayoutText;
 
         } else if (userMsg === 'no') {
             tempDiceResults = [];
-            replyText = "❌ ยกเลิกผลการสุ่มเต๋าเรียบร้อย! แอดมินสามารถคีย์คำสั่ง > เพื่อส่งผลใหม่อีกครั้งได้เลยครับ";
+            replyText = "❌ ยกเลิกผลรางวัลเรียบร้อย! แอดมินสามารถคีย์คำสั่ง > เพื่อส่งผลใหม่อีกครั้งได้เลยครับ";
         }
     }
 }
-
             // ==================== [ 10. ระบบลงทะเบียนสมาชิกใหม่ชั่วคราว (C/ชื่อ) ] ====================
             else if (originalMsg.startsWith('C/') || originalMsg.startsWith('c/')) {
                 const nameInput = originalMsg.substring(2).trim();
