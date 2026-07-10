@@ -519,7 +519,7 @@ else if (userMsg === 'ok' || userMsg === 'no') {
                     if (itemWinAmount > 0) {
                         hitAny = true;
                         totalWinAmount += itemWinAmount;
-                        userDetailText += `  • 🎉 ถูก ${bet.itemName} (${hitDetails.join(' + ')}) [X${bet.slotsCount}]: ได้ +${itemWinAmount} บ.\n`;
+                        userDetailText += `  • 🎉 ถูก ${bet.itemName} [X${bet.slotsCount}]: ได้ +${itemWinAmount} บ.\n`;
                     }
                 });
 
