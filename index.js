@@ -49,7 +49,7 @@ app.post('/webhook', async (req, res) => {
             const command = args[0]; 
 
             // 🔑 ระบุ ID แอดมินหลักของคุณ
-            const ADMIN_ID = "U2fb9233e5c539ae3970cbd698e2e18db";
+            const ADMIN_ID = "U3626a40fd31e093004d3789e44d3a7cd";
 
             // ==================== [ 1. ระบบเติมเงิน/ลบเงิน ] ====================
             if (command === "เติม" || command === "ลบ") {
@@ -390,9 +390,6 @@ app.post('/webhook', async (req, res) => {
                     replyText = `🎉 สมัครสมาชิกน้ำเต้าปูปลาสำเร็จ!\n👤 เลขของคุณคือ: [ ${usersWallets[userId].memberNumber} ]\n📛 ชื่อเล่น: คุณ ${nameInput}\n💰 เครดิตกระเป๋าเริ่มต้น: 0 บาท\n🛒 สามารถแจ้งแอดมินเติมเครดิตเพื่อส่งโพยได้เลยครับ!`;
                 }
             }
-            if (userMsg === 'เช็กไอดี') {
-    replyText = `ID ใหม่ของคุณคือ: ${userId}`;
-}
 
             // ==================== [ ระบบส่งข้อความ LINE กลับไปหาผู้เล่น ] ====================
             if (replyText) {
