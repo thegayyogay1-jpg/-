@@ -421,13 +421,13 @@ else if (userMsg === 'ok' || userMsg === 'no') {
                         let linePayout = ratePerSlot * bet.slotsCount;
                         totalWinAmount += linePayout;
 
-                        userDetailText += `  • 🎉 ถูก ${bet.itemName} [${bet.slotsCount} ช่อง]: ได้ +${linePayout} บ.\n`;
+                        userDetailText += `  • 🎉 ถูก ${bet.itemName} [X ${bet.slotsCount}]: ได้ +${linePayout} บ.\n`;
                     }
                 });
 
                 if (hitAny) {
                     user.balance += totalWinAmount;
-                    userDetailText += `  💰 รวมรับรอบนี้: +${totalWinAmount} บาท\n  ✨ เครดิตสุทธิ: ${user.balance} บาท\n`;
+                    userDetailText += ` ──────────────────\n 💰 รวมรับรอบนี้: +${totalWinAmount} บาท\n  ✨ เครดิตสุทธิ: ${user.balance} บาท\n`;
                 } else {
                     userDetailText += `  ❌ รอบนี้ไม่ถูกรางวัล\n  ✨ เครดิตคงเหลือ: ${user.balance} บาท\n`;
                 }
