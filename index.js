@@ -33,7 +33,7 @@ const itemNames = {
     "6": "เสือ"
 };
 
-app.post('/callback', async (req, res) => {
+app.post('/webhook', async (req, res) => {
     const events = req.body.events;
     if (!events) return res.sendStatus(200);
 
