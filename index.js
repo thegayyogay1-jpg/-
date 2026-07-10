@@ -477,7 +477,6 @@ else if (userMsg === 'ok' || userMsg === 'no') {
             }
 
             let summaryPayoutText = `💰 สรุปยอดได้/เสีย น้ำเต้าปูปลา รอบที่: ${currentRound}\n`;
-            let summaryPayoutText = `💰 สรุปยอดได้/เสีย น้ำเต้าปูปลา รอบที่: ${currentRound}\n`;
                 summaryPayoutText += `🥇 อันดับ 1 (จ่าย ${rewardConfig.rank1}): ${diceNames[0]}\n`;
                 summaryPayoutText += `🥈 อันดับ 2 (จ่าย ${rewardConfig.rank2}): ${diceNames[1]}\n`;
                 summaryPayoutText += `🥉 อันดับ 3 (จ่าย ${rewardConfig.rank3}): ${diceNames[2]}\n`;
