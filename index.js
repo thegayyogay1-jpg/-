@@ -357,64 +357,76 @@ app.post('/webhook', async (req, res) => {
                 }
             }
 
-            // ==================== [ 9. แอดมินยืนยันคำนวณแพ้ชนะจริง OK / NO (แก้ไขบั๊กคิดเงินเบิ้ลแล้ว) ] ====================
-            else if (userMsg === 'ok' || userMsg === 'no') {
-                if (userId !== ADMIN_ID) return res.sendStatus(200);
+            // ==================== [ 9. แอดมินยืนยันคำนวณแพ้ชนะจริง OK / NO (ปรับปรุงระบบแจกแจงรายตัว) ] ====================
+else if (userMsg === 'ok' || userMsg === 'no') {
+    if (userId !== ADMIN_ID) return res.sendStatus(200);
 
-                if (tempDiceResults.length === 0) {
-                    replyText = "⚠️ ไม่มีข้อมูลผลรางวัลเต๋าค้างอยู่ในระบบครับ กรุณาส่งผลด้วยคำสั่ง > ก่อน";
-                } else {
-                    if (userMsg === 'ok') {
-                        let diceNames = tempDiceResults.map(code => itemNames[code]);
-                        let summaryPayoutText = `💰 สรุปยอดได้/เสีย น้ำเต้าปูปลา รอบที่: ${currentRound}\n──────────────────\n🎲 ผลออก: [ ${diceNames.join(' , ')} ]\n──────────────────\n`;
+    if (tempDiceResults.length === 0) {
+        replyText = "⚠️ ไม่มีข้อมูลผลรางวัลเต๋าค้างอยู่ในระบบครับ กรุณาส่งผลด้วยคำสั่ง > ก่อน";
+    } else {
+        if (userMsg === 'ok') {
+            let diceNames = tempDiceResults.map(code => itemNames[code]);
+            let summaryPayoutText = `💰 สรุปยอดได้/เสีย น้ำเต้าปูปลา รอบที่: ${currentRound}\n🎲 ผลออก: [ ${diceNames.join(' , ')} ]\n──────────────────\n`;
+            
+            let hasAnyStatement = false;
+
+            for (let uId in roundBets) {
+                const userBetsArray = roundBets[uId];
+                if (!userBetsArray || userBetsArray.length === 0) continue;
+
+                const user = usersWallets[uId];
+                let totalWinAmount = 0; 
+                let userDetailText = `👤 [ ${user.memberNumber} ] คุณ ${user.name}\n`;
+                let hitAny = false;
+
+                // วิ่งเช็กทีละตัวที่ผู้เล่นคนนี้แทงไว้
+                userBetsArray.forEach((bet) => {
+                    // นับว่าตัวนี้ ตรงกับลูกเต๋ากี่ลูก (ผลลัพธ์ 1, 2 หรือ 3)
+                    let matchCount = tempDiceResults.filter(diceCode => diceCode === bet.itemCode).length;
+                    
+                    if (matchCount > 0) {
+                        hitAny = true;
+                        let ratePerSlot = 0;
                         
-                        let hasAnyStatement = false;
+                        // 🎯 ปรับตัวคูณตามที่คุณสั่งเป๊ะๆ
+                        if (matchCount === 1) ratePerSlot = 800;      // ผลลัพธ์ที่ 1 -> คูณ 800
+                        else if (matchCount === 2) ratePerSlot = 400; // ผลลัพธ์ที่ 2 -> คูณ 400
+                        else if (matchCount === 3) ratePerSlot = 400; // ผลลัพธ์ที่ 3 -> คูณ 400
+                        
+                        let linePayout = ratePerSlot * bet.slotsCount;
+                        totalWinAmount += linePayout;
 
-                        for (let uId in roundBets) {
-                            const userBetsArray = roundBets[uId];
-                            if (!userBetsArray || userBetsArray.length === 0) continue;
-
-                            const user = usersWallets[uId];
-                            let totalWinAmount = 0; 
-
-                            // ✨ จุดแก้ไขบั๊ก: คำนวณแยกตามรายบรรทัดของโพยตัวเลขนั้นๆ อย่างเด็ดขาด
-                            userBetsArray.forEach((bet) => {
-                                // นับว่ารหัสสิ่งของ (bet.itemCode) ตัวนี้ ตรงกับลูกเต๋ากี่ลูก
-                                let matchCount = tempDiceResults.filter(diceCode => diceCode === bet.itemCode).length;
-                                
-                                if (matchCount > 0) {
-                                    let ratePerSlot = 0;
-                                    if (matchCount === 1) ratePerSlot = 800;      // ถูก 1 ตัว ได้ช่องละ 800
-                                    else if (matchCount === 2) ratePerSlot = 400; // ถูก 2 ตัว ได้ช่องละ 400
-                                    else if (matchCount === 3) ratePerSlot = 400; // ถูก 3 ตัว ได้ช่องละ 400
-                                    
-                                    let linePayout = ratePerSlot * bet.slotsCount;
-                                    totalWinAmount += linePayout;
-                                }
-                            });
-
-                            if (totalWinAmount > 0) {
-                                user.balance += totalWinAmount;
-                            }
-
-                            summaryPayoutText += `👤 [ ${user.memberNumber} ] คุณ ${user.name}\n💰 ได้รับรางวัลสุทธิ: +${totalWinAmount} บาท\n✨ ยอดเครดิตคงเหลือ: ${user.balance} บาท\n──────────────────\n`;
-                            hasAnyStatement = true;
-                        }
-
-                        if (!hasAnyStatement) {
-                            summaryPayoutText += "ℹ️ ไม่มีสมาชิกท่านใดถูกรางวัลในรอบนี้ครับ";
-                        }
-
-                        roundBets = {};
-                        tempDiceResults = [];
-                        replyText = summaryPayoutText;
-
-                    } else if (userMsg === 'no') {
-                        tempDiceResults = [];
-                        replyText = "❌ ยกเลิกผลการสุ่มเต๋าเรียบร้อย! แอดมินสามารถคีย์คำสั่ง > เพื่อส่งผลใหม่อีกครั้งได้เลยครับ";
+                        // เขียนแจกแจงให้แอดมินและผู้เล่นอ่านง่ายขึ้น บอทจะพ่นบอกเลยว่าตัวไหนได้เท่าไหร่
+                        userDetailText += `  • 🎉 ถูก ${bet.itemName} (${matchCount} ลูก) [${bet.slotsCount} ช่อง]: ได้ +${linePayout} บ.\n`;
                     }
+                });
+
+                if (hitAny) {
+                    user.balance += totalWinAmount;
+                    userDetailText += `  💰 รวมรับรอบนี้: +${totalWinAmount} บาท\n  ✨ เครดิตสุทธิ: ${user.balance} บาท\n`;
+                } else {
+                    userDetailText += `  ❌ รอบนี้ไม่ถูกรางวัล\n  ✨ เครดิตคงเหลือ: ${user.balance} บาท\n`;
                 }
+
+                summaryPayoutText += userDetailText + `──────────────────\n`;
+                hasAnyStatement = true;
             }
+
+            if (!hasAnyStatement) {
+                summaryPayoutText += "ℹ️ ไม่มีสมาชิกท่านใดส่งโพยเดิมพันในรอบนี้ครับ";
+            }
+
+            // เคลียร์ค่ารอบ
+            roundBets = {};
+            tempDiceResults = [];
+            replyText = summaryPayoutText;
+
+        } else if (userMsg === 'no') {
+            tempDiceResults = [];
+            replyText = "❌ ยกเลิกผลการสุ่มเต๋าเรียบร้อย! แอดมินสามารถคีย์คำสั่ง > เพื่อส่งผลใหม่อีกครั้งได้เลยครับ";
+        }
+    }
+}
 
             // ==================== [ 10. ระบบลงทะเบียนสมาชิกใหม่ชั่วคราว (C/ชื่อ) ] ====================
             else if (originalMsg.startsWith('C/') || originalMsg.startsWith('c/')) {
