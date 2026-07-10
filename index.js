@@ -26,12 +26,12 @@ let tempDiceResults = [];
 
 // 📋 ตารางคู่มือจับคู่หมายเลข
 const itemNames = {
-    "1": "น้ำเต้า",
-    "2": "ปู",
-    "3": "ปลา",
-    "4": "กุ้ง",
-    "5": "ไก่",
-    "6": "เสือ"
+    "1": "🍐น้ำเต้า",
+    "2": "🦀ปู",
+    "3": "🐟ปลา",
+    "4": "🦐กุ้ง",
+    "5": "🐔ไก่",
+    "6": "🐯เสือ"
 };
 
 app.post('/webhook', async (req, res) => {
@@ -147,7 +147,7 @@ app.post('/webhook', async (req, res) => {
                             if (!isNaN(customPrice) && customPrice > 0) gameConfig.pricePerSlot = customPrice;
                             if (!isNaN(customMaxSlots) && customMaxSlots > 0) gameConfig.maxSlots = customMaxSlots;
 
-                            replyText = `📢 เริ่มเปิดรอบแทง [น้ำเต้าปูปลา] 🎉\n🎰 รอบที่: ${currentRound}\n💵 ล็อคราคา: ช่องละ ${gameConfig.pricePerSlot} บาท\n🔒 จำกัดจำนวน: ไม่เกิน ${gameConfig.maxSlots} ช่อง/ตัว\n──────────────────\n📋 รหัสสำหรับส่งโพย:\n1=น้ำเต้า , 2=ปู , 3=ปลา\n4=กุ้ง , 5=ไก่ , 6=เสือ\n📌 วิธีแทง: พิมพ์ [รหัส]-[จำนวนช่อง]\n👉 สามารถพิมพ์ติดกันได้ เช่น 123-5 (แทง 1,2,3 อย่างละ 5 ช่อง)`;
+                            replyText = `📢 เริ่มเปิดรอบแทง 🎉\n🎰 รอบที่: ${currentRound}\n💵 ล็อคราคา: ช่องละ ${gameConfig.pricePerSlot} บาท\n🔒 จำกัดจำนวน: ไม่เกิน ${gameConfig.maxSlots} ช่อง/ตัว\n──────────────────\n📋 รหัสสำหรับส่งโพย:\n1=🍐น้ำเต้า , 2=🦀ปู \n 3=🐟ปลา , 4=🦐กุ้ง \n 5=🐔ไก่ , 6=🐯เสือ\n📌 วิธีแทง: พิมพ์ [รหัส]-[จำนวนช่อง]\n👉 สามารถพิมพ์ติดกันได้ เช่น 123-5 (แทง 1,2,3 อย่างละ 5 ช่อง)`;
                         // 2. ดึงประวัติสถิติมาต่อท้ายบรรลัดล่างสุด
                             replyText += `\n──────────────────\n📊 สถิติผลรางวัล 10 รอบล่าสุด:\n──────────────────\n`;
                             if (gameHistory.length === 0) {
@@ -181,7 +181,7 @@ app.post('/webhook', async (req, res) => {
                             }
 
                             let closingBetSection = hasAnyBet ? `📝 สรุปยอดแทงประจำรอบ:\n${betSummaryText}` : `📝 ไม่มีสมาชิกส่งโพยเดิมพันในรอบนี้`;
-                            replyText = `🚫 ปิดรอบแทงเรียบร้อยแล้วครับ\n🏁 จบรอบที่: ${currentRound}\n──────────────────\n${closingBetSection}──────────────────\n🔒 หยุดรับโพยทุกกรณี รอแอดมินส่งผลสรุปเต๋าครับ`;
+                            replyText = `🚫 ปิดรอบแทงแล้วครับ\n🏁 จบรอบที่: ${currentRound}\n──────────────────\n${closingBetSection}──────────────────\n🔒 หยุดรับโพยทุกกรณี รอแอดมินส่งผลสรุปเต๋าครับ`;
                         }
                     } else if (userMsg === 'rst') {
                         currentRound = 0;
@@ -433,7 +433,7 @@ else if (userMsg === 'ok' || userMsg === 'no') {
                     if (itemWinAmount > 0) {
                         hitAny = true;
                         totalWinAmount += itemWinAmount;
-                        userDetailText += `  • 🎉 ถูก ${bet.itemName} (${hitDetails.join(' + ')}) [${bet.slotsCount} ช่อง]: ได้ +${itemWinAmount} บ.\n`;
+                        userDetailText += `  • 🎉 ถูก ${bet.itemName} (${hitDetails.join(' + ')}) [X${bet.slotsCount}]: ได้ +${itemWinAmount} บ.\n`;
                     }
                 });
 
