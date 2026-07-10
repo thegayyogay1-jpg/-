@@ -157,7 +157,7 @@ app.post('/webhook', async (req, res) => {
                                 let chronologicalHistory = gameHistory.slice().reverse();
                     
                     chronologicalHistory.forEach((history) => {
-                        replyText += `• รอบที่ ${history.round} ออก: [ ${history.resultNames.join(' , ')} ]\n`;
+                        replyText += `• รอบที่ ${history.round} ออก: [ ${history.resultNames.join(' , ')} ]\n──────────────────\n`;
                                 });
                             }
                         }
