@@ -13,6 +13,7 @@ let isRoundOpen = false;
 let roundBets = {};       // เก็บโพยแทงในรอบนั้นๆ
 let currentRound = 0;     
 let withdrawQueue = [];   // คิวรายการถอนเงิน
+let gameHistory = []; // 📊 เพิ่มตัวแปรสำหรับเก็บสถิติผลรางวัลย้อนหลัง (เก็บสูงสุด 10 รอบ)
 
 // ⚙️ การตั้งค่าระบบน้ำเต้าปูปลาประจำรอบ
 let gameConfig = {
@@ -147,6 +148,18 @@ app.post('/webhook', async (req, res) => {
                             if (!isNaN(customMaxSlots) && customMaxSlots > 0) gameConfig.maxSlots = customMaxSlots;
 
                             replyText = `📢 เริ่มเปิดรอบแทง [น้ำเต้าปูปลา] 🎉\n🎰 รอบที่: ${currentRound}\n💵 ล็อคราคา: ช่องละ ${gameConfig.pricePerSlot} บาท\n🔒 จำกัดจำนวน: ไม่เกิน ${gameConfig.maxSlots} ช่อง/ตัว\n──────────────────\n📋 รหัสสำหรับส่งโพย:\n1=น้ำเต้า , 2=ปู , 3=ปลา\n4=กุ้ง , 5=ไก่ , 6=เสือ\n📌 วิธีแทง: พิมพ์ [รหัส]-[จำนวนช่อง]\n👉 สามารถพิมพ์ติดกันได้ เช่น 123-5 (แทง 1,2,3 อย่างละ 5 ช่อง)`;
+                        // 2. ดึงประวัติสถิติมาต่อท้ายบรรลัดล่างสุด
+                            replyText += `\n📊 สถิติผลรางวัล 10 รอบล่าสุด:\n`;
+                            if (gameHistory.length === 0) {
+                                replyText += `• ยังไม่มีบันทึกสถิติ (ระบบจะเริ่มบันทึกเมื่อจบรอบนี้ครับ)`;
+                            }else {
+                                // วนลูปแสดงผลจากรอบล่าสุดลงไป (เรียงสวยๆ)
+                                let chronologicalHistory = gameHistory.slice().reverse();
+                    
+                    chronologicalHistory.forEach((history) => {
+                        replyText += `• รอบที่ ${history.round} ออก: [ ${history.resultNames.join(' , ')} ]\n`;
+                                });
+                            }
                         }
                     } else if (userMsg === 'x') {
                         if (!isRoundOpen) {
@@ -408,7 +421,7 @@ else if (userMsg === 'ok' || userMsg === 'no') {
                         let linePayout = ratePerSlot * bet.slotsCount;
                         totalWinAmount += linePayout;
 
-                        userDetailText += `  • 🎉 ถูก ${bet.itemName} (${hitPosition}) [${bet.slotsCount} ช่อง]: ได้ +${linePayout} บ.\n`;
+                        userDetailText += `  • 🎉 ถูก ${bet.itemName} [${bet.slotsCount} ช่อง]: ได้ +${linePayout} บ.\n`;
                     }
                 });
 
