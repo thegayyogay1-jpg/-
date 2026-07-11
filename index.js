@@ -94,9 +94,6 @@ app.post('/webhook', async (req, res) => {
                     }
                 }
             }
-                if (userMsg === 'เช็กไอดี') {
-    replyText = `ID ใหม่ของคุณคือ: ${userId}`;
-}
                 // ==================== [ คำสั่งแอดมิน: /set ตั้งค่าราคาและจำนวนช่อง ] ====================
 else if (command === '/s') {
     if (userId !== ADMIN_ID) {
